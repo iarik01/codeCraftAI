@@ -1,0 +1,34 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  application:
+    name: ai-service
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+app:
+  ai:
+    # AI_MODE selects provider: "mock" uses local generator, "gigachat" calls GigaChat API.
+    mode: ${AI_MODE:mock}
+    # If true, ai-service falls back to mock when GigaChat key/API/JSON response fails.
+    mock-enabled: ${AI_MOCK_ENABLED:true}
+    gigachat:
+      # Authorization Key from GigaChat cabinet, without "Basic " prefix.
+      # The Java provider sends it as: Authorization: Basic <GIGACHAT_AUTH_KEY>.
+      auth-key: ${GIGACHAT_AUTH_KEY:}
+      # OAuth scope for GigaChat API, usually GIGACHAT_API_PERS for personal access.
+      scope: ${GIGACHAT_SCOPE:GIGACHAT_API_PERS}
+      # OAuth endpoint used to exchange GIGACHAT_AUTH_KEY for access_token.
+      auth-url: ${GIGACHAT_AUTH_URL:${GIGACHAT_OAUTH_URL:https://ngw.devices.sberbank.ru:9443/api/v2/oauth}}
+      # Chat completions endpoint. ai-service reads choices[0].message.content from response.
+      api-url: ${GIGACHAT_API_URL:https://gigachat.devices.sberbank.ru/api/v1/chat/completions}
+      # Model name sent in chat completions body.
+      model: ${GIGACHAT_MODEL:GigaChat}
+      # Local Docker dev may need false because container truststore can reject GigaChat TLS chain.
+      # For production, prefer true with a properly configured truststore.
+      verify-ssl: ${GIGACHAT_VERIFY_SSL:false}

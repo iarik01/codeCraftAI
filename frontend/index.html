@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CodeCrafters AI</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main>
+      <section id="auth-view" class="auth-view">
+        <div class="auth-shell">
+          <section class="brand-panel">
+            <div class="logo"><span class="logo-mark">CC</span><span>CodeCrafters AI</span></div>
+            <h1>AI-кабинет для преподавателей и учеников</h1>
+            <p class="lead">
+              Генерируйте учебные задания, назначайте их группам, отправляйте решения и проверяйте работы в одном MVP-сценарии.
+            </p>
+            <ul class="feature-list">
+              <li>JWT-авторизация с ролями TEACHER и STUDENT</li>
+              <li>Группы, назначения заданий и ученический кабинет</li>
+              <li>Ручная проверка решений преподавателем</li>
+            </ul>
+          </section>
+
+          <section class="auth-card">
+            <div class="tabs">
+              <button id="login-tab" class="tab-button active" type="button">Вход</button>
+              <button id="register-tab" class="tab-button" type="button">Регистрация</button>
+            </div>
+
+            <form id="login-form">
+              <h2>Вход</h2>
+              <p>Введите email и пароль, чтобы открыть кабинет.</p>
+              <label>Email <input name="email" type="email" required autocomplete="email" /></label>
+              <label>Пароль <input name="password" type="password" required autocomplete="current-password" /></label>
+              <button id="login-submit" class="button" type="submit">Войти</button>
+            </form>
+
+            <form id="register-form" class="hidden">
+              <h2>Регистрация</h2>
+              <p>Создайте аккаунт преподавателя или ученика.</p>
+              <label>Имя <input name="name" type="text" required maxlength="150" autocomplete="name" /></label>
+              <label>Email <input name="email" type="email" required maxlength="320" autocomplete="email" /></label>
+              <label>Пароль <input name="password" type="password" required minlength="8" maxlength="72" autocomplete="new-password" /></label>
+              <label>
+                Роль
+                <select name="role" required>
+                  <option value="TEACHER">Преподаватель</option>
+                  <option value="STUDENT">Ученик</option>
+                </select>
+              </label>
+              <button id="register-submit" class="button" type="submit">Зарегистрироваться</button>
+            </form>
+
+            <div id="auth-status" aria-live="polite"></div>
+          </section>
+        </div>
+      </section>
+
+      <section id="dashboard-view" class="dashboard-view hidden">
+        <div class="app-shell">
+          <header class="dashboard-header">
+            <div class="dashboard-title">
+              <span class="logo-mark">CC</span>
+              <div>
+                <h1>CodeCrafters AI</h1>
+                <p id="dashboard-subtitle">Кабинет</p>
+              </div>
+            </div>
+            <div class="user-summary">
+              <div class="user-meta">
+                <strong id="current-user-name"></strong>
+                <span id="current-user-email"></span>
+              </div>
+              <span id="current-user-role" class="role-pill"></span>
+              <button id="logout-button" class="button secondary" type="button">Выйти</button>
+            </div>
+          </header>
+
+          <nav id="dashboard-nav" class="dashboard-nav"></nav>
+          <section id="view-content"></section>
+        </div>
+      </section>
+    </main>
+    <script src="./app.js"></script>
+  </body>
+</html>

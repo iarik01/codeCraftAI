@@ -1,0 +1,149 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: codecrafters-postgres
+    environment:
+      POSTGRES_DB: codecrafters_ai
+      POSTGRES_USER: codecrafters
+      POSTGRES_PASSWORD: codecrafters
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U codecrafters -d codecrafters_ai"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - codecrafters-network
+
+  db-migrations:
+    image: flyway/flyway:10-alpine
+    container_name: codecrafters-db-migrations
+    command:
+      - -url=jdbc:postgresql://postgres:5432/codecrafters_ai
+      - -user=codecrafters
+      - -password=codecrafters
+      - migrate
+    volumes:
+      - ./infrastructure/postgres/migrations:/flyway/sql
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - codecrafters-network
+
+  auth-service:
+    build:
+      context: ./services
+      dockerfile: auth-service/Dockerfile
+    container_name: codecrafters-auth-service
+    environment:
+      SERVICE_NAME: auth-service
+      PORT: 8080
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: codecrafters_ai
+      DB_USER: codecrafters
+      DB_PASSWORD: codecrafters
+      JWT_SECRET: dev-codecrafters-auth-secret-key-change-before-production
+      JWT_EXPIRATION_MINUTES: 120
+    ports:
+      - "8081:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      db-migrations:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - codecrafters-network
+
+  task-service:
+    build:
+      context: ./services
+      dockerfile: task-service/Dockerfile
+    container_name: codecrafters-task-service
+    environment:
+      SERVICE_NAME: task-service
+      PORT: 8080
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: codecrafters_ai
+      DB_USER: codecrafters
+      DB_PASSWORD: codecrafters
+      AI_SERVICE_URL: http://ai-service:8080
+      JWT_SECRET: dev-codecrafters-auth-secret-key-change-before-production
+    ports:
+      - "8082:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      db-migrations:
+        condition: service_completed_successfully
+      ai-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - codecrafters-network
+
+  ai-service:
+    build:
+      context: ./services
+      dockerfile: ai-service/Dockerfile
+    container_name: codecrafters-ai-service
+    environment:
+      SERVICE_NAME: ai-service
+      PORT: 8080
+      # Provider mode: "mock" or "gigachat". Values are read from local .env by Docker Compose.
+      AI_MODE: ${AI_MODE:-mock}
+      # Keep true in dev so GigaChat failures fall back to mock instead of breaking generation.
+      AI_MOCK_ENABLED: ${AI_MOCK_ENABLED:-true}
+      # Authorization Key from GigaChat cabinet. Do not include "Basic " in the value.
+      GIGACHAT_AUTH_KEY: ${GIGACHAT_AUTH_KEY:-}
+      # OAuth scope and endpoints used by ai-service's GigaChat provider.
+      GIGACHAT_SCOPE: ${GIGACHAT_SCOPE:-GIGACHAT_API_PERS}
+      GIGACHAT_AUTH_URL: ${GIGACHAT_AUTH_URL:-https://ngw.devices.sberbank.ru:9443/api/v2/oauth}
+      GIGACHAT_API_URL: ${GIGACHAT_API_URL:-https://gigachat.devices.sberbank.ru/api/v1/chat/completions}
+      GIGACHAT_MODEL: ${GIGACHAT_MODEL:-GigaChat}
+      # Local Docker dev may need false because container truststore can reject GigaChat TLS chain.
+      GIGACHAT_VERIFY_SSL: ${GIGACHAT_VERIFY_SSL:-false}
+    ports:
+      - "8083:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - codecrafters-network
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: codecrafters-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      auth-service:
+        condition: service_healthy
+      task-service:
+        condition: service_healthy
+    networks:
+      - codecrafters-network
+
+volumes:
+  postgres-data:
+
+networks:
+  codecrafters-network:
+    driver: bridge
