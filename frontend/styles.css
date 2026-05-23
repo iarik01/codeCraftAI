@@ -139,6 +139,28 @@ input:focus, select:focus, textarea:focus { border-color: rgb(37 99 235 / 65%); 
 .checkbox-row { display: flex; align-items: center; gap: 8px; font-weight: 650; }
 .checkbox-row input { width: auto; }
 
+.task-panel-header { display: flex; justify-content: flex-end; margin-bottom: 12px; }
+.button.small { min-height: 34px; padding: 6px 14px; font-size: 14px; border-radius: 10px; }
+.edit-fields { display: grid; gap: 14px; margin-top: 12px; }
+.field-hint { font-weight: 400; color: var(--muted); font-size: 12px; margin-left: 4px; }
+.code-area { font-family: "JetBrains Mono", "Fira Code", Consolas, monospace; font-size: 13px; min-height: 140px; }
+.edit-actions { display: flex; gap: 10px; margin-top: 16px; }
+
+.test-options { list-style: none; padding: 0; margin: 10px 0 4px; display: grid; gap: 6px; }
+.test-option {
+  padding: 8px 12px; border-radius: 10px;
+  background: var(--soft); border: 1px solid var(--line); color: var(--ink);
+}
+.test-option.correct {
+  background: #ecfdf3; border-color: #6ee7b7; color: var(--success); font-weight: 700;
+}
+.option-label { font-weight: 850; color: var(--accent); margin-right: 6px; }
+.test-option.correct .option-label { color: var(--success); }
+.test-explanation {
+  margin-top: 8px; padding: 10px 12px; border-radius: 10px;
+  background: #eff6ff; font-size: 14px; color: #1d4ed8;
+}
+
 @media (max-width: 920px) {
   .auth-shell, .grid-2, .grid-3, .form-grid { grid-template-columns: 1fr; }
   .dashboard-header, .view-header, .user-summary { align-items: stretch; flex-direction: column; }

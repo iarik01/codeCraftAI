@@ -69,8 +69,8 @@ AI-генерация учитывает тип задания:
 ## Основной MVP-сценарий
 
 1. Преподаватель и ученик регистрируются через frontend.
-2. Преподаватель создаёт группу.
-3. Преподаватель добавляет ученика в группу по email.
+2. Преподаватель создаёт группу — система генерирует invite-код.
+3. Ученик вводит invite-код в разделе «Мои группы» и вступает в группу.
 4. Преподаватель генерирует задание через `generated_tasks`.
 5. Преподаватель назначает задание группе.
 6. Ученик видит назначенное задание в своём кабинете.
@@ -96,10 +96,13 @@ Frontend остаётся на HTML/CSS/JavaScript без React. Файлы ра
 - `POST /api/tasks/generate`
 - `GET /api/tasks`
 - `GET /api/tasks/{id}`
+- `PATCH /api/tasks/{id}/content`
 - `POST /api/groups`
 - `GET /api/groups`
 - `POST /api/groups/{groupId}/students`
 - `POST /api/tasks/{taskId}/assign-groups`
+- `POST /api/student/groups/join`
+- `GET /api/student/groups`
 - `GET /api/student/tasks`
 - `POST /api/student/tasks/{taskId}/submit`
 - `GET /api/tasks/{taskId}/submissions`

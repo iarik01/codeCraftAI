@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record ReviewSubmissionRequest(
-        @Pattern(regexp = "REVIEWED")
+        @Pattern(regexp = "REVIEWED|NEEDS_REVISION")
         String status,
 
         @Min(1)

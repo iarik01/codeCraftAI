@@ -3,12 +3,9 @@ package ru.codecrafters.task.web.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public record SubmitTaskRequest(
+public record JoinGroupRequest(
         @NotBlank
-        @Size(max = 10000)
-        String answerText,
-
-        @Size(max = 2048)
-        String answerUrl
+        @Size(min = 6, max = 16)
+        String inviteCode
 ) {
 }

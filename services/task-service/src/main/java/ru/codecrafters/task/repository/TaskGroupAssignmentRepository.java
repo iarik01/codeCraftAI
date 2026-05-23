@@ -19,4 +19,6 @@ public interface TaskGroupAssignmentRepository extends JpaRepository<TaskGroupAs
     List<TaskGroupAssignmentEntity> findAllByGroupIdIn(Collection<UUID> groupIds);
 
     Optional<TaskGroupAssignmentEntity> findByTaskIdAndGroupId(UUID taskId, UUID groupId);
+
+    List<TaskGroupAssignmentEntity> findAllByTaskIdAndGroupIdIn(UUID taskId, Collection<UUID> groupIds);
 }

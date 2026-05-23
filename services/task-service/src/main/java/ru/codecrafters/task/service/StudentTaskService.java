@@ -1,6 +1,8 @@
 package ru.codecrafters.task.service;
 
+import java.time.OffsetDateTime;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -46,7 +48,10 @@ public class StudentTaskService {
             return List.of();
         }
 
-        List<UUID> taskIds = assignmentRepository.findAllByGroupIdIn(groupIds).stream()
+        List<TaskGroupAssignmentEntity> assignments = assignmentRepository.findAllByGroupIdIn(groupIds);
+        Map<UUID, OffsetDateTime> deadlineByTaskId = earliestDeadlineByTaskId(assignments);
+
+        List<UUID> taskIds = assignments.stream()
                 .map(TaskGroupAssignmentEntity::getTaskId)
                 .distinct()
                 .toList();
@@ -61,29 +66,43 @@ public class StudentTaskService {
 
         return taskRepository.findAllById(taskIds).stream()
                 .filter(task -> "GENERATED".equals(task.getStatus()))
-                .map(task -> StudentTaskResponse.from(task, submissionsByTaskId.get(task.getId())))
+                .map(task -> StudentTaskResponse.from(task, submissionsByTaskId.get(task.getId()), deadlineByTaskId.get(task.getId())))
                 .toList();
     }
 
     public StudentTaskResponse findAssignedTask(UUID studentId, UUID taskId) {
-        ensureTaskAssignedToStudent(studentId, taskId);
+        List<UUID> groupIds = studentGroupIds(studentId);
+        if (groupIds.isEmpty() || !assignmentRepository.existsByTaskIdAndGroupIdIn(taskId, groupIds)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found");
+        }
+
         GeneratedTaskEntity task = taskRepository.findById(taskId)
                 .filter(foundTask -> "GENERATED".equals(foundTask.getStatus()))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
+
+        OffsetDateTime deadline = assignmentRepository.findAllByTaskIdAndGroupIdIn(taskId, groupIds).stream()
+                .map(TaskGroupAssignmentEntity::getDeadline)
+                .filter(d -> d != null)
+                .min(Comparator.naturalOrder())
+                .orElse(null);
+
         TaskSubmissionEntity submission = submissionRepository.findByTaskIdAndStudentId(taskId, studentId).orElse(null);
-        return StudentTaskResponse.from(task, submission);
+        return StudentTaskResponse.from(task, submission, deadline);
     }
 
     public StudentSubmissionResponse submit(UUID studentId, UUID taskId, SubmitTaskRequest request) {
         ensureTaskAssignedToStudent(studentId, taskId);
         String answerText = request.answerText().trim();
+        String answerUrl = request.answerUrl() != null && !request.answerUrl().isBlank()
+                ? request.answerUrl().trim()
+                : null;
 
         TaskSubmissionEntity submission = submissionRepository.findByTaskIdAndStudentId(taskId, studentId)
                 .map(existing -> {
-                    existing.resubmit(answerText);
+                    existing.resubmit(answerText, answerUrl);
                     return existing;
                 })
-                .orElseGet(() -> new TaskSubmissionEntity(taskId, studentId, answerText));
+                .orElseGet(() -> new TaskSubmissionEntity(taskId, studentId, answerText, answerUrl));
 
         return StudentSubmissionResponse.from(submissionRepository.save(submission));
     }
@@ -99,5 +118,15 @@ public class StudentTaskService {
         return memberRepository.findAllByStudentId(studentId).stream()
                 .map(GroupMemberEntity::getGroupId)
                 .toList();
+    }
+
+    private Map<UUID, OffsetDateTime> earliestDeadlineByTaskId(Collection<TaskGroupAssignmentEntity> assignments) {
+        return assignments.stream()
+                .filter(a -> a.getDeadline() != null)
+                .collect(Collectors.toMap(
+                        TaskGroupAssignmentEntity::getTaskId,
+                        TaskGroupAssignmentEntity::getDeadline,
+                        (d1, d2) -> d1.isBefore(d2) ? d1 : d2
+                ));
     }
 }

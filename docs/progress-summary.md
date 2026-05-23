@@ -50,7 +50,10 @@ Legacy-модель `/api/assignments` не расширяется.
 - `GET /api/groups/{groupId}`
 - `POST /api/groups/{groupId}/students`
 - `GET /api/groups/{groupId}/students`
+- `PATCH /api/tasks/{id}/content`
 - `POST /api/tasks/{taskId}/assign-groups`
+- `POST /api/student/groups/join`
+- `GET /api/student/groups`
 - `GET /api/student/tasks`
 - `GET /api/student/tasks/{taskId}`
 - `POST /api/student/tasks/{taskId}/submit`

@@ -107,6 +107,10 @@ public class GeneratedTaskEntity {
         this.status = "FAILED";
     }
 
+    public void updateContent(Map<String, Object> generatedContent) {
+        this.generatedContent = generatedContent;
+    }
+
     public UUID getId() { return id; }
     public UUID getTeacherId() { return teacherId; }
     public Direction getSubjectArea() { return subjectArea; }

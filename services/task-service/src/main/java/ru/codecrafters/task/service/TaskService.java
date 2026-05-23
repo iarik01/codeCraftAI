@@ -20,6 +20,7 @@ import ru.codecrafters.task.web.dto.AiGenerateTaskRequest;
 import ru.codecrafters.task.web.dto.AiGenerateTaskResponse;
 import ru.codecrafters.task.web.dto.GenerateTaskRequest;
 import ru.codecrafters.task.web.dto.TaskResponse;
+import ru.codecrafters.task.web.dto.UpdateTaskContentRequest;
 
 @Service
 public class TaskService {
@@ -104,6 +105,13 @@ public class TaskService {
                 .stream()
                 .map(TaskResponse::from)
                 .toList();
+    }
+
+    public TaskResponse updateContent(UUID teacherId, UUID id, UpdateTaskContentRequest request) {
+        GeneratedTaskEntity task = taskRepository.findByIdAndTeacherId(id, teacherId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
+        task.updateContent(request.generatedContent());
+        return TaskResponse.from(taskRepository.save(task));
     }
 
     private String buildPrompt(GenerateTaskRequest request) {

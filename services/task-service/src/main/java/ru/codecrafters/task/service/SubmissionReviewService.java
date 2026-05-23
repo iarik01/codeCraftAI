@@ -50,7 +50,7 @@ public class SubmissionReviewService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Submission not found"));
         requireTeacherTask(teacherId, submission.getTaskId());
 
-        submission.review(request.grade(), normalizeNullable(request.teacherComment()));
+        submission.review(request.status(), request.grade(), normalizeNullable(request.teacherComment()));
         TaskSubmissionEntity saved = submissionRepository.save(submission);
         UserAccountEntity student = userRepository.findById(saved.getStudentId()).orElse(null);
         return SubmissionResponse.from(saved, student);

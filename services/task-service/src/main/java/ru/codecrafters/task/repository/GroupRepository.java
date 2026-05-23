@@ -10,4 +10,6 @@ public interface GroupRepository extends JpaRepository<GroupEntity, UUID> {
     List<GroupEntity> findAllByTeacherIdOrderByCreatedAtDesc(UUID teacherId);
 
     Optional<GroupEntity> findByIdAndTeacherId(UUID id, UUID teacherId);
+
+    Optional<GroupEntity> findByInviteCodeIgnoreCase(String inviteCode);
 }

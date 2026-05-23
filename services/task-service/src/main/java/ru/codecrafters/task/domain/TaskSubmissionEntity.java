@@ -28,6 +28,9 @@ public class TaskSubmissionEntity {
     @Column(name = "answer_text", nullable = false)
     private String answerText;
 
+    @Column(name = "answer_url")
+    private String answerUrl;
+
     @Column(nullable = false, length = 32)
     private String status;
 
@@ -49,10 +52,11 @@ public class TaskSubmissionEntity {
     protected TaskSubmissionEntity() {
     }
 
-    public TaskSubmissionEntity(UUID taskId, UUID studentId, String answerText) {
+    public TaskSubmissionEntity(UUID taskId, UUID studentId, String answerText, String answerUrl) {
         this.taskId = taskId;
         this.studentId = studentId;
         this.answerText = answerText;
+        this.answerUrl = answerUrl;
         this.status = "SUBMITTED";
     }
 
@@ -68,8 +72,9 @@ public class TaskSubmissionEntity {
         updatedAt = OffsetDateTime.now();
     }
 
-    public void resubmit(String answerText) {
+    public void resubmit(String answerText, String answerUrl) {
         this.answerText = answerText;
+        this.answerUrl = answerUrl;
         this.status = "SUBMITTED";
         this.teacherComment = null;
         this.grade = null;
@@ -77,8 +82,8 @@ public class TaskSubmissionEntity {
         this.submittedAt = OffsetDateTime.now();
     }
 
-    public void review(Integer grade, String teacherComment) {
-        this.status = "REVIEWED";
+    public void review(String status, Integer grade, String teacherComment) {
+        this.status = status;
         this.grade = grade;
         this.teacherComment = teacherComment;
         this.reviewedAt = OffsetDateTime.now();
@@ -88,6 +93,7 @@ public class TaskSubmissionEntity {
     public UUID getTaskId() { return taskId; }
     public UUID getStudentId() { return studentId; }
     public String getAnswerText() { return answerText; }
+    public String getAnswerUrl() { return answerUrl; }
     public String getStatus() { return status; }
     public String getTeacherComment() { return teacherComment; }
     public Integer getGrade() { return grade; }

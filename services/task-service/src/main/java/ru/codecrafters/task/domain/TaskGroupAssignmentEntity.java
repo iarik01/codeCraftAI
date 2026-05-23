@@ -27,12 +27,16 @@ public class TaskGroupAssignmentEntity {
     @Column(name = "assigned_at", nullable = false)
     private OffsetDateTime assignedAt;
 
+    @Column(name = "deadline")
+    private OffsetDateTime deadline;
+
     protected TaskGroupAssignmentEntity() {
     }
 
-    public TaskGroupAssignmentEntity(UUID taskId, UUID groupId) {
+    public TaskGroupAssignmentEntity(UUID taskId, UUID groupId, OffsetDateTime deadline) {
         this.taskId = taskId;
         this.groupId = groupId;
+        this.deadline = deadline;
     }
 
     @PrePersist
@@ -40,19 +44,9 @@ public class TaskGroupAssignmentEntity {
         assignedAt = OffsetDateTime.now();
     }
 
-    public UUID getId() {
-        return id;
-    }
-
-    public UUID getTaskId() {
-        return taskId;
-    }
-
-    public UUID getGroupId() {
-        return groupId;
-    }
-
-    public OffsetDateTime getAssignedAt() {
-        return assignedAt;
-    }
+    public UUID getId() { return id; }
+    public UUID getTaskId() { return taskId; }
+    public UUID getGroupId() { return groupId; }
+    public OffsetDateTime getAssignedAt() { return assignedAt; }
+    public OffsetDateTime getDeadline() { return deadline; }
 }

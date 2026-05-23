@@ -19,6 +19,7 @@ import ru.codecrafters.task.repository.UserAccountRepository;
 import ru.codecrafters.task.web.dto.AddStudentRequest;
 import ru.codecrafters.task.web.dto.CreateGroupRequest;
 import ru.codecrafters.task.web.dto.GroupResponse;
+import ru.codecrafters.task.web.dto.JoinGroupRequest;
 import ru.codecrafters.task.web.dto.StudentResponse;
 
 @Service
@@ -76,6 +77,30 @@ public class GroupService {
 
         GroupMemberEntity membership = memberRepository.save(new GroupMemberEntity(group.getId(), student.getId()));
         return StudentResponse.from(student, membership);
+    }
+
+    public GroupResponse joinByInviteCode(UUID studentId, JoinGroupRequest request) {
+        GroupEntity group = groupRepository.findByInviteCodeIgnoreCase(request.inviteCode().trim())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found by invite code"));
+
+        if (memberRepository.existsByGroupIdAndStudentId(group.getId(), studentId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Already a member of this group");
+        }
+
+        memberRepository.save(new GroupMemberEntity(group.getId(), studentId));
+        return GroupResponse.from(group);
+    }
+
+    public List<GroupResponse> findStudentGroups(UUID studentId) {
+        List<UUID> groupIds = memberRepository.findAllByStudentId(studentId).stream()
+                .map(GroupMemberEntity::getGroupId)
+                .toList();
+        if (groupIds.isEmpty()) {
+            return List.of();
+        }
+        return groupRepository.findAllById(groupIds).stream()
+                .map(GroupResponse::from)
+                .toList();
     }
 
     public List<StudentResponse> findStudents(UUID teacherId, UUID groupId) {

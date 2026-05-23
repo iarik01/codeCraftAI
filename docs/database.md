@@ -8,6 +8,7 @@
 - `V2__seed_roles.sql` - роли `TEACHER` и `STUDENT`.
 - `V3__add_generated_tasks_ai_generation_requests.sql` - актуальная AI-модель `generated_tasks` и `ai_generation_requests`.
 - `V4__add_task_assignments_and_submissions.sql` - назначение `generated_tasks` группам и решения учеников.
+- `V5__add_answer_url_deadline_needs_revision.sql` - поле `answer_url` в решениях, `deadline` в назначениях, статус `NEEDS_REVISION` в решениях.
 
 ## Актуальные таблицы
 
@@ -72,6 +73,7 @@
 - `task_id` -> `generated_tasks.id`
 - `group_id` -> `groups.id`
 - `assigned_at`
+- `deadline` — необязательный срок сдачи (null = бессрочное)
 
 Ограничение `UNIQUE (task_id, group_id)` предотвращает повторное назначение одного задания одной группе.
 
@@ -85,7 +87,8 @@
 - `task_id` -> `generated_tasks.id`
 - `student_id` -> `users.id`
 - `answer_text`
-- `status`: `SUBMITTED` или `REVIEWED`
+- `answer_url` — необязательная ссылка на внешний ресурс (Scratch, Replit, CodePen и т.д.)
+- `status`: `SUBMITTED`, `REVIEWED` или `NEEDS_REVISION`
 - `teacher_comment`
 - `grade`
 - `submitted_at`

@@ -13,8 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
@@ -300,10 +298,6 @@ public class GigachatTaskGenerationProvider implements TaskGenerationProvider {
 
     private void validateTest(JsonNode root, GenerateTaskRequest request) {
         JsonNode questions = requiredArray(root, "questions");
-        int expectedQuestionCount = requestedQuestionCount(request.additionalRequirements());
-        if (questions.size() != expectedQuestionCount) {
-            throw new IllegalStateException("GigaChat TEST questions count does not match requested count");
-        }
         for (JsonNode question : questions) {
             requiredText(question, "question");
             JsonNode options = requiredArray(question, "options");
@@ -324,19 +318,6 @@ public class GigachatTaskGenerationProvider implements TaskGenerationProvider {
             requiredText(question, "explanation");
         }
         requiredText(root, "passingScore");
-    }
-
-    private int requestedQuestionCount(String additionalRequirements) {
-        if (additionalRequirements == null || additionalRequirements.isBlank()) {
-            return 5;
-        }
-        Matcher matcher = Pattern.compile("(\\d+)\\s*(вопрос|вопроса|вопросов)", Pattern.CASE_INSENSITIVE)
-                .matcher(additionalRequirements);
-        if (!matcher.find()) {
-            return 5;
-        }
-        int count = Integer.parseInt(matcher.group(1));
-        return Math.max(1, Math.min(count, 30));
     }
 
     private JsonNode requiredArray(JsonNode root, String fieldName) {

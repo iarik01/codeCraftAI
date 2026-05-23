@@ -44,7 +44,7 @@ public class TaskAssignmentService {
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found: " + groupId));
 
             if (!assignmentRepository.existsByTaskIdAndGroupId(taskId, groupId)) {
-                assignmentRepository.save(new TaskGroupAssignmentEntity(taskId, groupId));
+                assignmentRepository.save(new TaskGroupAssignmentEntity(taskId, groupId, request.deadline()));
             }
         }
 

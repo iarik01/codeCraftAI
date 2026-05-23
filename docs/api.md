@@ -23,15 +23,32 @@ JWT содержит `sub`, `email`, `role`.
 - `POST /api/tasks/generate` - сгенерировать задание. `teacherId` берётся из JWT.
 - `GET /api/tasks` - список заданий текущего преподавателя.
 - `GET /api/tasks/{id}` - задание текущего преподавателя.
+- `PATCH /api/tasks/{id}/content` - обновить `generatedContent` задания.
 - `POST /api/tasks/{taskId}/assign-groups` - назначить задание группам.
+
+Пример обновления контента задания (`PATCH /api/tasks/{id}/content`):
+
+```json
+{
+  "generatedContent": {
+    "title": "Новое название",
+    "description": "Обновлённое описание"
+  }
+}
+```
+
+Поле `generatedContent` полностью заменяет текущее содержимое задания. Структура должна соответствовать типу задания.
 
 Пример назначения:
 
 ```json
 {
-  "groupIds": ["00000000-0000-0000-0000-000000000000"]
+  "groupIds": ["00000000-0000-0000-0000-000000000000"],
+  "deadline": "2026-06-01T23:59:00Z"
 }
 ```
+
+`deadline` — необязательный параметр в формате ISO 8601. Если не указан — задание бессрочное.
 
 ### Группы
 
@@ -73,9 +90,26 @@ JWT содержит `sub`, `email`, `role`.
 }
 ```
 
-`grade` и `teacherComment` могут быть `null`.
+`status` — `REVIEWED` (зачтено) или `NEEDS_REVISION` (нужно доработать). `grade` и `teacherComment` могут быть `null`.
 
 ## Student API
+
+### Группы
+
+- `POST /api/student/groups/join` - вступить в группу по коду приглашения.
+- `GET /api/student/groups` - список групп, в которых состоит текущий ученик.
+
+Пример вступления:
+
+```json
+{
+  "inviteCode": "AB3K7PQR"
+}
+```
+
+Код нечувствителен к регистру. Возвращает `GroupResponse` группы, в которую вступил ученик.
+
+### Задания
 
 - `GET /api/student/tasks` - задания, назначенные группам текущего ученика.
 - `GET /api/student/tasks/{taskId}` - назначенное ученику задание.
@@ -85,11 +119,16 @@ JWT содержит `sub`, `email`, `role`.
 
 ```json
 {
-  "answerText": "Моё решение задания..."
+  "answerText": "Моё решение задания...",
+  "answerUrl": "https://scratch.mit.edu/projects/123456"
 }
 ```
 
+`answerUrl` — необязательное поле (ссылка на Scratch, Replit, CodePen, GitHub Pages и т.д.).
+
 Student responses не содержат служебные поля `prompt`, `teacherId`, `aiProvider` и `teacherSolution`.
+
+Ответ задания (`StudentTaskResponse`) включает поле `deadline` (null если не задан).
 
 ## AI Service
 

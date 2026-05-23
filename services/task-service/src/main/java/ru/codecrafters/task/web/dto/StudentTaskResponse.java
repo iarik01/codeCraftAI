@@ -23,9 +23,10 @@ public record StudentTaskResponse(
         Map<String, Object> generatedContent,
         String status,
         OffsetDateTime createdAt,
+        OffsetDateTime deadline,
         StudentSubmissionResponse submission
 ) {
-    public static StudentTaskResponse from(GeneratedTaskEntity task, TaskSubmissionEntity submission) {
+    public static StudentTaskResponse from(GeneratedTaskEntity task, TaskSubmissionEntity submission, OffsetDateTime deadline) {
         return new StudentTaskResponse(
                 task.getId(),
                 task.getSubjectArea(),
@@ -36,6 +37,7 @@ public record StudentTaskResponse(
                 sanitizeContent(task.getGeneratedContent()),
                 task.getStatus(),
                 task.getCreatedAt(),
+                deadline,
                 StudentSubmissionResponse.from(submission)
         );
     }

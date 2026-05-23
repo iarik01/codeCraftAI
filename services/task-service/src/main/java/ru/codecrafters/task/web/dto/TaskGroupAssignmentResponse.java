@@ -8,14 +8,16 @@ public record TaskGroupAssignmentResponse(
         UUID id,
         UUID taskId,
         UUID groupId,
-        OffsetDateTime assignedAt
+        OffsetDateTime assignedAt,
+        OffsetDateTime deadline
 ) {
     public static TaskGroupAssignmentResponse from(TaskGroupAssignmentEntity assignment) {
         return new TaskGroupAssignmentResponse(
                 assignment.getId(),
                 assignment.getTaskId(),
                 assignment.getGroupId(),
-                assignment.getAssignedAt()
+                assignment.getAssignedAt(),
+                assignment.getDeadline()
         );
     }
 }
